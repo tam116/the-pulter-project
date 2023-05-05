@@ -23,13 +23,15 @@ jobs:
       - run: npm i -g gulp-cli@latest
       - run: npm run build
 
-      - name: Deploy to Netlify
-        uses: nwtgck/actions-netlify@v1.2
+      - name: Deploy to S3
+        uses: shallwefootball/upload-s3-action@v1.3.3
         with:
           publish-dir: 'dist'
           production-deploy: true
           deploy-message: Triggered from Github Actions by @${{ github.actor }}.
         env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          aws_key_id: ${{ secrets.AWS_KEY_ID_dev }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY_dev}}
+          aws_bucket: ${{ secrets.AWS_BUCKET_dev }}
+          source_dir: 'dirname'
         timeout-minutes: 1
