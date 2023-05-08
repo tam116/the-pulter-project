@@ -23,15 +23,25 @@ jobs:
       - run: npm i -g gulp-cli@latest
       - run: npm run build
 
-      - name: Deploy to S3
+    - name: Import Secrets
+      id: import-secrets
+      uses: hashicorp/vault-action@v2
+      with:
+        url: https://vault.weinberg.northwestern.edu
+        role: MADS-S3-dev
+        secrets: |
+          platforms-kvv2/data/secrets/MADS-S3/dev access_key | AWS_ACCESS_KEY_ID ;
+          platforms-kvv2/data/secrets/MADS-S3/dev secret_key | AWS_SECRET_ACCESS_KEY ;
+
+      - name: Deploy to S3 steps.import-secrets.outputs.
         uses: shallwefootball/upload-s3-action@v1.3.3
         with:
           publish-dir: 'dist'
           production-deploy: true
           deploy-message: Triggered from Github Actions by @${{ github.actor }}.
         env:
-          aws_key_id: ${{ secrets.AWS_KEY_ID_dev }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY_dev}}
-          aws_bucket: ${{ secrets.AWS_BUCKET_dev }}
-          source_dir: 'dirname'
+          aws_key_id: "${{  steps.import-secrets.outputs..AWS_ACCESS_KEY_ID }}"
+          aws_secret_access_key: "${{ steps.import-secrets.outputs.AWS_SECRET_ACCESS_KEY }}"
+          aws_bucket: "mads-static-sites-dev-pulterproject-dev"
+          source_dir: 'dist'
         timeout-minutes: 1
