@@ -10,19 +10,19 @@ jobs:
   build-and-deploy:
     runs-on: macos-latest
     steps:
-      - name: Check out the repo
-        uses: actions/checkout@v1
-        with:
-          submodules: true
+#       - name: Check out the repo
+#         uses: actions/checkout@v1
+#         with:
+#           submodules: true
 
-      - name: Prepare Node 18
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18.x'
+#       - name: Prepare Node 18
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: '18.x'
 
-      - run: yarn
-      - run: npm i -g gulp-cli@latest
-      - run: npm run build
+#       - run: yarn
+#       - run: npm i -g gulp-cli@latest
+#       - run: npm run build
 
       - name: Import Secrets
         id: import-secrets
@@ -30,6 +30,7 @@ jobs:
         with:
           url: https://vault.weinberg.northwestern.edu
           role: MADS-S3-dev
+          method: jwt
           secrets: |
             platforms-kvv2/data/secrets/MADS-S3/dev access_key | AWS_ACCESS_KEY_ID ;
             platforms-kvv2/data/secrets/MADS-S3/dev secret_key | AWS_SECRET_ACCESS_KEY ;
