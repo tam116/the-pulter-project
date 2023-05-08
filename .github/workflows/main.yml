@@ -1,6 +1,7 @@
 name: 'Preview Site: Build and Deploy to Netlify'
 
 on:
+  workflow_dispatch:
   push:
     branches: [ 'develop' ]
     paths: ['pulter-site/**', 'pulter-poems/**']
