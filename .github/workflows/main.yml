@@ -31,7 +31,7 @@ jobs:
         id: import-secrets
         uses: hashicorp/vault-action@v2
         with:
-          url: https://vault.weinberg.northwestern.edu
+          url: https://vault.weinberg.northwestern.edu:443
           role: MADS-S3-dev
           method: jwt
           secrets: |
