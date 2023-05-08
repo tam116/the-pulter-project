@@ -36,7 +36,7 @@ jobs:
             platforms-kvv2/data/secrets/MADS-S3/dev secret_key | AWS_SECRET_ACCESS_KEY ;
 
       - name: Deploy to S3 
-        uses: shallwefootball/upload-s3-action@v1
+        uses: shallwefootball/upload-s3-action@v1.3.3
         with:
           publish-dir: 'dist'
           production-deploy: true
