@@ -42,10 +42,6 @@ jobs:
       - name: Deploy to S3 
         uses: shallwefootball/upload-s3-action@v1.3.3
         with:
-          publish-dir: 'dist'
-          production-deploy: true
-          deploy-message: Triggered from Github Actions by @${{ github.actor }}.
-        env:
           aws_key_id: "${{  steps.import-secrets.outputs.AWS_ACCESS_KEY_ID }}"
           aws_secret_access_key: "${{ steps.import-secrets.outputs.AWS_SECRET_ACCESS_KEY }}"
           aws_bucket: "mads-static-sites-dev-pulterproject-dev"
