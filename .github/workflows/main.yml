@@ -23,15 +23,15 @@ jobs:
       - run: npm i -g gulp-cli@latest
       - run: npm run build
 
-    - name: Import Secrets
-      id: import-secrets
-      uses: hashicorp/vault-action@v2
-      with:
-        url: https://vault.weinberg.northwestern.edu
-        role: MADS-S3-dev
-        secrets: |
-          platforms-kvv2/data/secrets/MADS-S3/dev access_key | AWS_ACCESS_KEY_ID ;
-          platforms-kvv2/data/secrets/MADS-S3/dev secret_key | AWS_SECRET_ACCESS_KEY ;
+      - name: Import Secrets
+        id: import-secrets
+        uses: hashicorp/vault-action@v2
+        with:
+          url: https://vault.weinberg.northwestern.edu
+          role: MADS-S3-dev
+          secrets: |
+            platforms-kvv2/data/secrets/MADS-S3/dev access_key | AWS_ACCESS_KEY_ID ;
+            platforms-kvv2/data/secrets/MADS-S3/dev secret_key | AWS_SECRET_ACCESS_KEY ;
 
       - name: Deploy to S3 steps.import-secrets.outputs.
         uses: shallwefootball/upload-s3-action@v1.3.3
