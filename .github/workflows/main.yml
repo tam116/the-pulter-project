@@ -42,16 +42,17 @@ jobs:
             platforms-kvv2/data/secrets/MADS-S3/dev access_key | AWS_ACCESS_KEY_ID ;
             platforms-kvv2/data/secrets/MADS-S3/dev secret_key | AWS_SECRET_ACCESS_KEY ;
 
-      - name: Deploy to S3 
-        steps:
-          - id: sync
-            run: aws s3 sync dist/ s3://$BUCKET_NAME --delete
-          - id: get_dist_id 
-            run: |
-            "cf_dist_id=$(aws ssm get-parameter --name /platforms/mads-static-sites/dev/${BUCKET_NAME}/CF_dist --output json --no-cli-pager" \
-            "| jq '.Parameter.Value' -r)" >> "$GITHUB_OUTPUT"
-        - id: invalidate
-          run:  aws cloudfront create-invalidation --distribution-id ${{steps.get_dist_id.cf_dist_id --paths "/*"
+      - name: Deploy to S3     
+        id: sync
+        run: aws s3 sync dist/ s3://$BUCKET_NAME --delete
+      - name: Get CF Dist ID
+        id: get_dist_id 
+        run: |
+          "cf_dist_id=$(aws ssm get-parameter --name /platforms/mads-static-sites/dev/${BUCKET_NAME}/CF_dist --output json --no-cli-pager" \
+          "| jq '.Parameter.Value' -r)" >> "$GITHUB_OUTPUT"
+      - name: Invalidate CF cache
+        id: invalidate
+        run:  aws cloudfront create-invalidation --distribution-id ${{steps.get_dist_id.cf_dist_id --paths "/*"
         env:
           AWS_ACCESS_KEY_ID: "${{ steps.import-secrets.outputs.AWS_ACCESS_KEY_ID }}"
           AWS_SECRET_ACCESS_KEY:  "${{ steps.import-secrets.outputs.AWS_SECRET_ACCESS_KEY }}"
