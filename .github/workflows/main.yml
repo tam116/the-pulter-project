@@ -43,7 +43,7 @@ jobs:
             platforms-kvv2/data/secrets/MADS-S3/dev secret_key | AWS_SECRET_ACCESS_KEY ;
 
       - name: Deploy to S3 
-        run: aws s3 cp dist/* s3://$BUCKET_NAME --recursive
+        run: aws s3 cp dist/ s3://$BUCKET_NAME --recursive
         env:
           AWS_ACCESS_KEY_ID: "${{ steps.import-secrets.outputs.AWS_ACCESS_KEY_ID }}"
           AWS_SECRET_ACCESS_KEY:  "${{ steps.import-secrets.outputs.AWS_SECRET_ACCESS_KEY }}"
