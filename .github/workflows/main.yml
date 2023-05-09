@@ -48,7 +48,7 @@ jobs:
       - name: Get CF Dist ID
         id: get_dist_id 
         run: |
-          "cf_dist_id=$(aws ssm get-parameter --name /platforms/mads-static-sites/dev/${BUCKET_NAME}/CF_dist --output json --no-cli-pager" \
+          echo "cf_dist_id=$(aws ssm get-parameter --name /platforms/mads-static-sites/dev/${BUCKET_NAME}/CF_dist --output json --no-cli-pager" \
           "| jq '.Parameter.Value' -r)" >> "$GITHUB_OUTPUT"
       - name: Invalidate CF cache
         id: invalidate
