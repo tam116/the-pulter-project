@@ -27,7 +27,7 @@ jobs:
       - run: yarn
       - run: npm i -g gulp-cli@latest
       - run: npm run build
-# #       - run: mkdir dist
+#       - run: mkdir dist
 #       - run: echo `date` > dist/date.html
 
       - name: Import Secrets
