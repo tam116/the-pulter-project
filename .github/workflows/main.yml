@@ -45,11 +45,21 @@ jobs:
       - name: Deploy to S3     
         id: sync
         run: aws s3 sync dist/ s3://$BUCKET_NAME --delete
+        env:
+          AWS_ACCESS_KEY_ID: "${{ steps.import-secrets.outputs.AWS_ACCESS_KEY_ID }}"
+          AWS_SECRET_ACCESS_KEY:  "${{ steps.import-secrets.outputs.AWS_SECRET_ACCESS_KEY }}"
+          AWS_DEFAULT_REGION: us-east-2
+          BUCKET_NAME: "mads-static-sites-dev-pulterproject-dev"
       - name: Get CF Dist ID
         id: get_dist_id 
         run: |
           echo "cf_dist_id=$(aws ssm get-parameter --name /platforms/mads-static-sites/dev/${BUCKET_NAME}/CF_dist --output json --no-cli-pager" \
           "| jq '.Parameter.Value' -r)" >> "$GITHUB_OUTPUT"
+        env:
+          AWS_ACCESS_KEY_ID: "${{ steps.import-secrets.outputs.AWS_ACCESS_KEY_ID }}"
+          AWS_SECRET_ACCESS_KEY:  "${{ steps.import-secrets.outputs.AWS_SECRET_ACCESS_KEY }}"
+          AWS_DEFAULT_REGION: us-east-2
+          BUCKET_NAME: "mads-static-sites-dev-pulterproject-dev"
       - name: Invalidate CF cache
         id: invalidate
         run:  aws cloudfront create-invalidation --distribution-id ${ {steps.get_dist_id.cf_dist_id }} --paths "/*"
