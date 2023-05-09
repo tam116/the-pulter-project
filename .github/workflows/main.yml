@@ -55,4 +55,4 @@ jobs:
 #           aws_secret_access_key: "${{ steps.import-secrets.outputs.AWS_SECRET_ACCESS_KEY }}"
 #           aws_bucket: "mads-static-sites-dev-pulterproject-dev"
 #           source_dir: 'dist'
-        timeout-minutes: 1
+        timeout-minutes: 5
