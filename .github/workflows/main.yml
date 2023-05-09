@@ -52,7 +52,7 @@ jobs:
           "| jq '.Parameter.Value' -r)" >> "$GITHUB_OUTPUT"
       - name: Invalidate CF cache
         id: invalidate
-        run:  aws cloudfront create-invalidation --distribution-id ${{steps.get_dist_id.cf_dist_id --paths "/*"
+        run:  aws cloudfront create-invalidation --distribution-id ${ {steps.get_dist_id.cf_dist_id }} --paths "/*"
         env:
           AWS_ACCESS_KEY_ID: "${{ steps.import-secrets.outputs.AWS_ACCESS_KEY_ID }}"
           AWS_SECRET_ACCESS_KEY:  "${{ steps.import-secrets.outputs.AWS_SECRET_ACCESS_KEY }}"
