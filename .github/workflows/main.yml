@@ -44,7 +44,8 @@ jobs:
 
       - name: Deploy to S3     
         id: sync
-        run: aws s3 sync dist/ s3://$BUCKET_NAME --delete
+#         run: aws s3 sync dist/ s3://$BUCKET_NAME --delete
+        run: aws s3 sync dist/ s3://$BUCKET_NAME 
         env:
           AWS_ACCESS_KEY_ID: "${{ steps.import-secrets.outputs.AWS_ACCESS_KEY_ID }}"
           AWS_SECRET_ACCESS_KEY:  "${{ steps.import-secrets.outputs.AWS_SECRET_ACCESS_KEY }}"
@@ -54,19 +55,9 @@ jobs:
         id: get_dist_id 
         run: |
           echo "cf_dist_id=$(aws ssm get-parameter --name /platforms/mads-static-sites/dev/${BUCKET_NAME}/CF_dist --output json | jq '.Parameter.Value' -r)" >> "$GITHUB_ENV"
-        env:
-          AWS_ACCESS_KEY_ID: "${{ steps.import-secrets.outputs.AWS_ACCESS_KEY_ID }}"
-          AWS_SECRET_ACCESS_KEY:  "${{ steps.import-secrets.outputs.AWS_SECRET_ACCESS_KEY }}"
-          AWS_DEFAULT_REGION: us-east-2
-          BUCKET_NAME: "mads-static-sites-dev-pulterproject-dev"
       - name: Invalidate CF cache
         id: invalidate
         run:  aws cloudfront create-invalidation --distribution-id ${{ env.cf_dist_id }} --paths "/*"
-        env:
-          AWS_ACCESS_KEY_ID: "${{ steps.import-secrets.outputs.AWS_ACCESS_KEY_ID }}"
-          AWS_SECRET_ACCESS_KEY:  "${{ steps.import-secrets.outputs.AWS_SECRET_ACCESS_KEY }}"
-          AWS_DEFAULT_REGION: us-east-2
-          BUCKET_NAME: "mads-static-sites-dev-pulterproject-dev"
 #         uses: shallwefootball/upload-s3-action@v1.3.3
 #         with:
 #           aws_key_id: "${{ steps.import-secrets.outputs.AWS_ACCESS_KEY_ID }}"
