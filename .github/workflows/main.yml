@@ -14,21 +14,21 @@ jobs:
     runs-on: macos-latest
 #     runs-on: ubuntu-latest
     steps:
-#       - name: Check out the repo
-#         uses: actions/checkout@v1
-#         with:
-#           submodules: true
+      - name: Check out the repo
+        uses: actions/checkout@v1
+        with:
+          submodules: true
 
-#       - name: Prepare Node 18
-#         uses: actions/setup-node@v3
-#         with:
-#           node-version: '18.x'
+      - name: Prepare Node 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
 
-#       - run: yarn
-#       - run: npm i -g gulp-cli@latest
-#       - run: npm run build
-      - run: mkdir dist
-      - run: echo `date` > dist/date.html
+      - run: yarn
+      - run: npm i -g gulp-cli@latest
+      - run: npm run build
+#       - run: mkdir dist
+#       - run: echo `date` > dist/date.html
 
       - name: Import Secrets
         id: import-secrets
@@ -45,7 +45,7 @@ jobs:
       - name: Deploy to S3     
         id: sync
 #         run: aws s3 sync dist/ s3://$BUCKET_NAME --delete
-        run: aws s3 sync dist/ s3://$BUCKET_NAME 
+        run: aws s3 sync dist/ s3://$BUCKET_NAME  --delete
         env:
           AWS_ACCESS_KEY_ID: "${{ steps.import-secrets.outputs.AWS_ACCESS_KEY_ID }}"
           AWS_SECRET_ACCESS_KEY:  "${{ steps.import-secrets.outputs.AWS_SECRET_ACCESS_KEY }}"
@@ -53,11 +53,21 @@ jobs:
           BUCKET_NAME: "mads-static-sites-dev-pulterproject-dev"
       - name: Get CF Dist ID
         id: get_dist_id 
+        env:
+          AWS_ACCESS_KEY_ID: "${{ steps.import-secrets.outputs.AWS_ACCESS_KEY_ID }}"
+          AWS_SECRET_ACCESS_KEY:  "${{ steps.import-secrets.outputs.AWS_SECRET_ACCESS_KEY }}"
+          AWS_DEFAULT_REGION: us-east-2
+          BUCKET_NAME: "mads-static-sites-dev-pulterproject-dev"
         run: |
           echo "cf_dist_id=$(aws ssm get-parameter --name /platforms/mads-static-sites/dev/${BUCKET_NAME}/CF_dist --output json | jq '.Parameter.Value' -r)" >> "$GITHUB_ENV"
       - name: Invalidate CF cache
         id: invalidate
         run:  aws cloudfront create-invalidation --distribution-id ${{ env.cf_dist_id }} --paths "/*"
+        env:
+          AWS_ACCESS_KEY_ID: "${{ steps.import-secrets.outputs.AWS_ACCESS_KEY_ID }}"
+          AWS_SECRET_ACCESS_KEY:  "${{ steps.import-secrets.outputs.AWS_SECRET_ACCESS_KEY }}"
+          AWS_DEFAULT_REGION: us-east-2
+          BUCKET_NAME: "mads-static-sites-dev-pulterproject-dev"
 #         uses: shallwefootball/upload-s3-action@v1.3.3
 #         with:
 #           aws_key_id: "${{ steps.import-secrets.outputs.AWS_ACCESS_KEY_ID }}"
