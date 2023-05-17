@@ -1,0 +1,79 @@
+name: 'Preview Site: Build and Deploy to S3'
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ 'develop' ]
+    paths: ['pulter-site/**', 'pulter-poems/**']
+
+jobs:
+  build-and-deploy:
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: macos-latest
+#     runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v1
+        with:
+          submodules: true
+
+      - name: Prepare Node 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+
+      - run: yarn
+      - run: npm i -g gulp-cli@latest
+      - run: npm run build
+#       - run: mkdir dist
+#       - run: echo `date` > dist/date.html
+
+      - name: Import Secrets
+        id: import-secrets
+        uses: hashicorp/vault-action@v2
+        with:
+          url: https://vault.weinberg.northwestern.edu:443
+          role: MADS-S3-dev
+          path: jwt-github-mads
+          method: jwt
+          secrets: |
+            platforms-kvv2/data/secrets/MADS-S3/dev access_key | AWS_ACCESS_KEY_ID ;
+            platforms-kvv2/data/secrets/MADS-S3/dev secret_key | AWS_SECRET_ACCESS_KEY ;
+
+      - name: Deploy to S3     
+        id: sync
+#         run: aws s3 sync dist/ s3://$BUCKET_NAME --delete
+        run: aws s3 sync dist/ s3://$BUCKET_NAME  --delete
+        env:
+          AWS_ACCESS_KEY_ID: "${{ steps.import-secrets.outputs.AWS_ACCESS_KEY_ID }}"
+          AWS_SECRET_ACCESS_KEY:  "${{ steps.import-secrets.outputs.AWS_SECRET_ACCESS_KEY }}"
+          AWS_DEFAULT_REGION: us-east-2
+          BUCKET_NAME: "mads-static-sites-dev-pulterproject-dev"
+      - name: Get CF Dist ID
+        id: get_dist_id 
+        env:
+          AWS_ACCESS_KEY_ID: "${{ steps.import-secrets.outputs.AWS_ACCESS_KEY_ID }}"
+          AWS_SECRET_ACCESS_KEY:  "${{ steps.import-secrets.outputs.AWS_SECRET_ACCESS_KEY }}"
+          AWS_DEFAULT_REGION: us-east-2
+          BUCKET_NAME: "mads-static-sites-dev-pulterproject-dev"
+        run: |
+          echo "cf_dist_id=$(aws ssm get-parameter --name /platforms/mads-static-sites/dev/${BUCKET_NAME}/CF_dist --output json | jq '.Parameter.Value' -r)" >> "$GITHUB_ENV"
+      - name: Invalidate CF cache
+        id: invalidate
+        run:  aws cloudfront create-invalidation --distribution-id ${{ env.cf_dist_id }} --paths "/*"
+        env:
+          AWS_ACCESS_KEY_ID: "${{ steps.import-secrets.outputs.AWS_ACCESS_KEY_ID }}"
+          AWS_SECRET_ACCESS_KEY:  "${{ steps.import-secrets.outputs.AWS_SECRET_ACCESS_KEY }}"
+          AWS_DEFAULT_REGION: us-east-2
+          BUCKET_NAME: "mads-static-sites-dev-pulterproject-dev"
+#         uses: shallwefootball/upload-s3-action@v1.3.3
+#         with:
+#           aws_key_id: "${{ steps.import-secrets.outputs.AWS_ACCESS_KEY_ID }}"
+#           aws_secret_access_key: "${{ steps.import-secrets.outputs.AWS_SECRET_ACCESS_KEY }}"
+#           aws_bucket: "mads-static-sites-dev-pulterproject-dev"
+#           source_dir: 'dist'
+        timeout-minutes: 5
+        
+
